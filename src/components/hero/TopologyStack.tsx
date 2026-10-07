@@ -1,14 +1,15 @@
 "use client";
 
 import { Users } from "lucide-react";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { topologyLayers, topologyNodes } from "@/content/topology";
 import { cn } from "@/lib/cn";
 import { Frame } from "@/components/ui/Frame";
 
 /**
  * Phone layout of the access topology: one compact row per layer, linked by
- * a rail. Tap a system to read what it does, right under its layer.
+ * a rail. A signal traces down the rail layer by layer (the phone stand-in for
+ * the desktop pulses). Tap a system to read what it does, right under its layer.
  */
 export function TopologyStack() {
   const [selected, setSelected] = useState<string | null>(null);
@@ -16,17 +17,27 @@ export function TopologyStack() {
   return (
     <Frame label="FIG. 01 — Access topology" footer={<span>Tap a system to inspect it</span>}>
       <ol className="relative px-3 py-1.5">
-        <span aria-hidden="true" className="absolute top-5 bottom-5 left-[1.05rem] w-px bg-line-strong" />
         {topologyLayers.map((layer, li) => {
           const nodes = topologyNodes.filter((n) => n.layer === layer.id).sort((a, b) => a.x - b.x);
           const open = nodes.find((n) => n.id === selected);
           const detailId = `topo-m-${layer.id}`;
           return (
-            <li key={layer.id} className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] gap-x-2 border-b border-line py-2 last:border-b-0">
+            <li
+              key={layer.id}
+              style={{ "--i": li } as CSSProperties}
+              className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] gap-x-2 border-b border-line py-2 last:border-b-0"
+            >
+              {/* Rail from this layer's marker to the next one's. */}
+              {li < topologyLayers.length - 1 ? (
+                <span
+                  aria-hidden="true"
+                  className="trace-seg absolute top-[1.3875rem] left-[calc(0.76875rem-0.5px)] h-full w-px bg-line-strong"
+                />
+              ) : null}
               <span
                 aria-hidden="true"
                 className={cn(
-                  "absolute top-[0.95rem] left-[0.55rem] size-[0.4375rem] border",
+                  "trace-node absolute top-[0.95rem] left-[0.55rem] size-[0.4375rem] border",
                   open ? "border-accent bg-accent" : "border-fg-subtle bg-surface",
                 )}
               />
@@ -42,7 +53,7 @@ export function TopologyStack() {
                     aria-controls={detailId}
                     onClick={() => setSelected((s) => (s === n.id ? null : n.id))}
                     className={cn(
-                      "inline-flex min-h-8 items-center gap-1.5 rounded-[3px] border px-2 text-[0.8125rem] font-medium transition-colors",
+                      "trace-chip inline-flex min-h-8 items-center gap-1.5 rounded-[3px] border px-2 text-[0.8125rem] font-medium transition-colors",
                       selected === n.id ? "border-accent bg-accent-soft text-fg" : "border-line-strong bg-surface text-fg-muted",
                     )}
                   >

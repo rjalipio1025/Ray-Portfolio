@@ -604,6 +604,64 @@
   animation: drop 3.6s linear infinite;
 }
 
+/*
+ * Phone topology: a signal walks down the layers, one 0.45s step per layer in a
+ * 6.5s cycle (a step is ~7% of the cycle). Each row is delayed by its index, so
+ * markers light the moment the rail above them finishes filling. Keyframes leave
+ * out from/to, so a tapped (selected) node keeps its own colors in between.
+ */
+.trace-seg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  box-shadow: 0 0 6px color-mix(in oklab, var(--accent) 70%, transparent);
+  transform-origin: top;
+  animation: trace-fill 6.5s linear calc(var(--i) * 0.45s) infinite both;
+}
+
+.trace-node {
+  z-index: 1;
+  animation: trace-node 6.5s var(--ease-state) calc(var(--i) * 0.45s) infinite;
+}
+
+.trace-chip {
+  animation: trace-chip 6.5s var(--ease-state) calc(var(--i) * 0.45s) infinite;
+}
+
+@keyframes trace-fill {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  7%,
+  70% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  84%,
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+@keyframes trace-node {
+  2%,
+  70% {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+}
+
+@keyframes trace-chip {
+  4%,
+  40% {
+    border-color: color-mix(in oklab, var(--accent) 55%, var(--line-strong));
+  }
+}
+
 /* ─── Dialogs (command palette, mobile menu) ────────────────────────────── */
 
 dialog.ui-dialog {
@@ -696,8 +754,14 @@ dialog.ui-dialog .mobile-menu-item {
 
   .pulse,
   .spine-pulse,
+  .trace-seg::after,
   .animate-ping-slow {
     display: none;
+  }
+
+  .trace-node,
+  .trace-chip {
+    animation: none !important;
   }
 
   .moving-line::after {
