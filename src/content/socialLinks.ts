@@ -6,7 +6,7 @@ import type { SocialLink } from "./types";
  * component (hero, contact, footer, résumé, palette, JSON-LD) picks it up.
  */
 const email = "rjalipio1025@gmail.com";
-const githubUser = "rayjoseph16";
+const githubUser = "rjalipio1025";
 const linkedinUrl: string | null = "https://www.linkedin.com/in/ray-joseph-alipio-43853b1b6";
 
 function linkedinHandle(url: string) {

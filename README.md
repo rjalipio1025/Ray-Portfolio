@@ -55,7 +55,7 @@ domain is attached. Every route is statically prerendered, so any Node host also
 ## Before going live
 
 - [ ] Add the LinkedIn URL in `src/content/socialLinks.ts` (`linkedinUrl`). It then appears everywhere automatically.
-- [ ] Confirm the GitHub profile (`rayjoseph16`) is the one to show publicly.
+- [x] GitHub profile: `rjalipio1025` (confirmed 2026-10-07).
 - [ ] Read the three case studies in `src/content/caseStudies.ts`. Issue, investigation and tools come from the brief.
       Resolution and prevention were drafted from typical root causes, so make sure they match what actually happened.
 - [ ] Set `NEXT_PUBLIC_SITE_URL`, rebuild, and run `npm run resume:pdf`.
