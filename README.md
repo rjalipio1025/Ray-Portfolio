@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ray Joseph Alipio — portfolio
 
-## Getting Started
+Personal site for an IT Systems Administrator (endpoint management, identity & access, IT operations).
+Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS 4, Motion 14.
 
-First, run the development server:
+- Design plan (information architecture, design system, motion strategy, components): [docs/DESIGN.md](docs/DESIGN.md)
+- Editing content: [docs/CONTENT.md](docs/CONTENT.md)
+- Adding screenshots safely: [docs/REDACTION.md](docs/REDACTION.md)
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Production build and preview:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm run start        # http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Checks: `npm run lint` and `npm run typecheck`.
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` and fill in what applies.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Purpose |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | Live origin, e.g. `https://rayalipio.com`. Used for canonical URLs, Open Graph, sitemap, robots and JSON-LD. On Vercel it falls back to the production domain automatically. |
+| `NEXT_PUBLIC_CONTACT_ENDPOINT` | Optional. A form endpoint that accepts JSON (for example Formspree). Without it, the contact form opens the visitor's email app with the message filled in. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Résumé PDF
 
-## Deploy on Vercel
+The PDF is printed from the HTML résumé, so the two never drift apart. After changing content:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build && npm run start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run resume:pdf
+```
+
+The PDF is written to `public/Ray-Joseph-Alipio-Resume.pdf`. Set `RESUME_URL` if the server runs on another
+port. Build with `NEXT_PUBLIC_SITE_URL` set so the portfolio link appears in the PDF header.
+
+## Deploy
+
+Vercel is the simplest path: import the repo, keep the defaults, and set `NEXT_PUBLIC_SITE_URL` once a custom
+domain is attached. Every route is statically prerendered, so any Node host also works with `npm run build && npm run start`.
+
+## Before going live
+
+- [ ] Add the LinkedIn URL in `src/content/socialLinks.ts` (`linkedinUrl`). It then appears everywhere automatically.
+- [ ] Confirm the GitHub profile (`rayjoseph16`) is the one to show publicly.
+- [ ] Read the three case studies in `src/content/caseStudies.ts`. Issue, investigation and tools come from the brief.
+      Resolution and prevention were drafted from typical root causes, so make sure they match what actually happened.
+- [ ] Set `NEXT_PUBLIC_SITE_URL`, rebuild, and run `npm run resume:pdf`.
+
+## Quality bar (measured on the production build)
+
+| | Performance | Accessibility | Best practices | SEO |
+|---|---|---|---|---|
+| Desktop `/` and `/resume` | 100 | 100 | 100 | 100 |
+| Mobile `/` and `/resume` (simulated slow 4G) | 91–92 | 100 | 100 | 100 |
+
+Cumulative layout shift is 0. An automated pass covers keyboard order and focus rings, the skip link, tab and
+topology arrow keys, the command palette, the mobile menu (focus trap, Esc, focus return), reduced motion
+(no running animations, static trace, final stat values), horizontal overflow, every link and anchor, metadata,
+and a privacy scan for phone numbers and client names.

@@ -1,26 +1,764 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+@custom-variant pointer-fine (@media (hover: hover) and (pointer: fine));
+
+/* ─── Design tokens ─────────────────────────────────────────────────────────
+   Dark is the flagship: near-black, graphite and deep navy with one
+   electric-blue accent. Light is warm white with deep navy type.            */
+
+:root,
+[data-theme="dark"] {
+  --bg: #05070b;
+  --bg-raised: #080b11;
+  --surface: #0b0f16;
+  --surface-2: #111620;
+  --line: #18202c;
+  --line-strong: #263041;
+  --fg: #eef0f3;
+  --fg-muted: #a0a8b5;
+  --fg-subtle: #7a8495;
+  --accent: #3ab8ff;
+  --accent-strong: #6ccbff;
+  --accent-fg: #021220;
+  --accent-soft: rgb(58 184 255 / 0.12);
+  --cyan: #74e4f3;
+  --violet: #8b7cff;
+  --ok: #3dd68c;
+  /* Fleet OS colors: blue vs amber, distinguishable for common color-vision deficiencies. */
+  --mac: #3ab8ff;
+  --win: #f5a524;
+  --on-mac: #021220;
+  --on-win: #1f1300;
+  --grid: rgb(148 163 184 / 0.045);
+  --tick: rgb(160 175 200 / 0.42);
+  --glow: rgb(58 184 255 / 0.11);
+  --highlight: rgb(255 255 255 / 0.04);
+  --backdrop: rgb(2 4 8 / 0.72);
+  --noise-opacity: 0.06;
+  --cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Cpath d='M91.5 96h9M96 91.5v9' stroke='rgba(170,185,210,0.28)' stroke-width='1'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: #faf9f6;
+  --bg-raised: #f3f2ee;
+  --surface: #ffffff;
+  --surface-2: #f4f3ef;
+  --line: #e4e2dc;
+  --line-strong: #cfccc4;
+  --fg: #0b1530;
+  --fg-muted: #3e4659;
+  --fg-subtle: #5f6677;
+  --accent: #1257d0;
+  --accent-strong: #0d47ad;
+  --accent-fg: #ffffff;
+  --accent-soft: rgb(18 87 208 / 0.08);
+  --cyan: #0b7f94;
+  --violet: #5b4bd1;
+  --ok: #157347;
+  --mac: #1257d0;
+  --win: #b45309;
+  --on-mac: #ffffff;
+  --on-win: #ffffff;
+  --grid: rgb(11 21 48 / 0.05);
+  --tick: rgb(11 21 48 / 0.32);
+  --glow: rgb(18 87 208 / 0.07);
+  --highlight: rgb(255 255 255 / 0.85);
+  --backdrop: rgb(11 21 48 / 0.3);
+  --noise-opacity: 0.045;
+  --cross: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192'%3E%3Cpath d='M91.5 96h9M96 91.5v9' stroke='rgba(11,21,48,0.22)' stroke-width='1'/%3E%3C/svg%3E");
+  color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-bg-raised: var(--bg-raised);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-ok: var(--ok);
+  --color-mac: var(--mac);
+  --color-win: var(--win);
+  --color-on-mac: var(--on-mac);
+  --color-on-win: var(--on-win);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── Base ──────────────────────────────────────────────────────────────── */
+
+/* In the base layer so Tailwind utilities (outline-none etc.) can override. */
+@layer base {
+  html {
+    background: var(--bg);
+    scroll-padding-top: 4rem;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  body {
+    position: relative;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Film grain: fixed, behind content, never intercepts pointer events. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: var(--noise-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--accent) 32%, transparent);
+    color: var(--fg);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Layout utilities ──────────────────────────────────────────────────── */
+
+@utility container-page {
+  width: 100%;
+  max-width: 78rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (width >= 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (width >= 64rem) {
+    padding-inline: 2.5rem;
+  }
+}
+
+/* Section identifiers, metadata and system labels. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility meta {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility display {
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* ─── Schematic backdrop ─────────────────────────────────────────────────
+   A 48px grid with registration crosses every 192px, at very low contrast. */
+
+.schematic-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    var(--cross),
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size:
+    192px 192px,
+    48px 48px,
+    48px 48px;
+  background-position: -96px -96px, -1px -1px, -1px -1px;
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 20rem), transparent);
+}
+
+/* Windows marks carry a hatch so the OS split never depends on color alone. */
+.win-hatch {
+  background-image: repeating-linear-gradient(135deg, rgb(0 0 0 / 0.22) 0 2px, transparent 2px 5px);
+}
+
+.hero-glow {
+  background: radial-gradient(closest-side, var(--glow), transparent);
+}
+
+/* Schematic frame: hairline border with registration ticks on every corner. */
+.frame {
+  position: relative;
+  border: 1px solid var(--line);
+  background: color-mix(in oklab, var(--surface) 70%, transparent);
+  box-shadow: inset 0 1px 0 var(--highlight);
+}
+
+.frame::before {
+  --t: var(--tick);
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background:
+    linear-gradient(var(--t), var(--t)) top left / 12px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) top left / 1px 12px no-repeat,
+    linear-gradient(var(--t), var(--t)) top right / 12px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) top right / 1px 12px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom left / 12px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom left / 1px 12px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom right / 12px 1px no-repeat,
+    linear-gradient(var(--t), var(--t)) bottom right / 1px 12px no-repeat;
+}
+
+/* Small registration cross used on section rules. */
+.crosshair {
+  position: relative;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  flex: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--tick);
+}
+
+.crosshair::before {
+  left: 4px;
+  top: 0;
+  width: 1px;
+  height: 9px;
+}
+
+.crosshair::after {
+  top: 4px;
+  left: 0;
+  width: 9px;
+  height: 1px;
+}
+
+/* Grid inside diagrams; brightens under a fine pointer (cursor-reactive). */
+.diagram-grid {
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.diagram-spot {
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), var(--glow), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-state);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .spotlight:hover .diagram-spot {
+    opacity: 1;
+  }
+}
+
+/* Depth: background layers drift a few pixels against the cursor. */
+.depth-layer {
+  transform: translate3d(calc(var(--px, 0) * -7px), calc(var(--py, 0) * -7px), 0);
+  transition: transform 0.6s var(--ease-out-soft);
+}
+
+/* ─── Navigation underline ──────────────────────────────────────────────── */
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.3rem;
+  height: 1px;
+  background: var(--fg-subtle);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s var(--ease-out-soft);
+}
+
+.nav-link:not([aria-current]):hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ─── Entrance & reveal ─────────────────────────────────────────────────── */
+
+@keyframes rise {
+  from {
+    opacity: 0.01;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes settle {
+  from {
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0.01;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes unclip-down {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  80%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes drop {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 100cqh, 0);
+    opacity: 0;
+  }
+}
+
+.animate-rise {
+  animation: rise 0.75s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* Hero text that can be the LCP element: movement only, no fade, so it counts
+   as painted on the first frame. */
+.animate-settle {
+  animation: settle 0.9s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.animate-fade {
+  animation: fade 0.9s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.animate-unclip {
+  animation: unclip-down 1.6s var(--ease-out-soft) both;
+  animation-delay: var(--d, 0ms);
+}
+
+.animate-ping-slow {
+  animation: ping 2.6s var(--ease-out-soft) infinite;
+}
+
+.page-enter {
+  animation: fade 0.32s var(--ease-out-soft) both;
+}
+
+/* Scroll reveals are armed only once the observer runs, so the page is fully
+   visible without JavaScript. Variants keep transitions intentional per section. */
+[data-reveal-armed] [data-reveal] {
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft),
+    clip-path 1.1s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal-armed] [data-reveal]:not([data-revealed]) {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+[data-reveal-armed] [data-reveal="left"]:not([data-revealed]) {
+  transform: translate3d(-28px, 0, 0);
+}
+
+[data-reveal-armed] [data-reveal="right"]:not([data-revealed]) {
+  transform: translate3d(28px, 0, 0);
+}
+
+[data-reveal-armed] [data-reveal="scale"]:not([data-revealed]) {
+  transform: scale(0.97);
+}
+
+[data-reveal-armed] [data-reveal="fade"]:not([data-revealed]) {
+  transform: none;
+}
+
+/* Line rise: the observed element is the overflow-hidden mask; its child
+   slides up into view (a fully clipped element can't be observed itself). */
+[data-reveal-armed] [data-reveal="rise"]:not([data-revealed]) {
+  opacity: 1;
+  transform: none;
+}
+
+[data-reveal-armed] [data-reveal="rise"] > * {
+  transition: transform 1s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+[data-reveal-armed] [data-reveal="rise"]:not([data-revealed]) > * {
+  transform: translate3d(0, 108%, 0);
+}
+
+/* Left-to-right wipe, like a scan line passing. */
+[data-reveal-armed] [data-reveal="wipe"]:not([data-revealed]) {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 100% 0 0);
+}
+
+[data-reveal-armed] [data-reveal="wipe"][data-revealed] {
+  clip-path: inset(0 0 0 0);
+}
+
+/* "moving." in the hero: a faint rule with a light passing along it. */
+.moving-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0.15em;
+  bottom: -0.08em;
+  height: 1px;
+  background:
+    linear-gradient(90deg, transparent, var(--cyan), transparent) 0 0 / 35% 100% no-repeat,
+    color-mix(in oklab, var(--accent) 35%, transparent);
+  animation: sweep 3.4s var(--ease-state) 1.2s infinite;
+}
+
+@keyframes sweep {
+  from {
+    background-position: -40% 0, 0 0;
+  }
+  to {
+    background-position: 140% 0, 0 0;
+  }
+}
+
+/* ─── Cursor spotlight on panels (fine pointers only) ───────────────────── */
+
+.spotlight {
+  position: relative;
+  isolation: isolate;
+}
+
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    360px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--accent) 8%, transparent),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-state);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .spotlight:hover::after {
+    opacity: 1;
+  }
+}
+
+/* ─── Topology ──────────────────────────────────────────────────────────── */
+
+.topo-edge {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  transition:
+    stroke 0.25s var(--ease-state),
+    opacity 0.25s var(--ease-state);
+}
+
+[data-active] .topo-edge {
+  opacity: 0.22;
+}
+
+[data-active] .topo-edge[data-lit] {
+  stroke: var(--accent);
+  opacity: 1;
+}
+
+.pulse {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px 2px color-mix(in oklab, var(--accent) 55%, transparent);
+  offset-anchor: center;
+  offset-rotate: 0deg;
+  opacity: 0;
+  pointer-events: none;
+  animation: travel var(--dur, 5s) linear var(--delay, 0s) infinite;
+}
+
+[data-paused] .pulse,
+[data-active] .pulse {
+  animation-play-state: paused;
+}
+
+[data-active] .pulse {
+  opacity: 0 !important;
+}
+
+.spine-pulse {
+  animation: drop 3.6s linear infinite;
+}
+
+/* ─── Dialogs (command palette, mobile menu) ────────────────────────────── */
+
+dialog.ui-dialog {
+  opacity: 0;
+  transform: translate3d(0, 8px, 0) scale(0.985);
+  transition:
+    opacity 0.18s var(--ease-state),
+    transform 0.18s var(--ease-state),
+    overlay 0.18s allow-discrete,
+    display 0.18s allow-discrete;
+}
+
+dialog.ui-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  dialog.ui-dialog[open] {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.985);
+  }
+}
+
+dialog.ui-dialog::backdrop {
+  background: var(--backdrop);
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  transition:
+    opacity 0.18s var(--ease-state),
+    overlay 0.18s allow-discrete,
+    display 0.18s allow-discrete;
+}
+
+dialog.ui-dialog[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  dialog.ui-dialog[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Full-screen sheet variant: fade only, menu items stagger in. */
+dialog.ui-dialog.ui-sheet,
+dialog.ui-dialog.ui-sheet[open] {
+  transform: none;
+}
+
+dialog.ui-dialog .mobile-menu-item {
+  transition:
+    opacity 0.45s var(--ease-out-soft),
+    transform 0.45s var(--ease-out-soft);
+  transition-delay: calc(var(--i, 0) * 35ms + 60ms);
+}
+
+@starting-style {
+  dialog.ui-dialog[open] .mobile-menu-item {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+/* ─── Side rail (≥1440px): scroll telemetry in the margin ───────────────── */
+
+.side-rail {
+  display: none;
+}
+
+@media (width >= 90rem) {
+  .side-rail {
+    display: flex;
+  }
+}
+
+/* ─── Reduced motion: keep feedback, drop movement ─────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .pulse,
+  .spine-pulse,
+  .animate-ping-slow {
+    display: none;
+  }
+
+  .moving-line::after {
+    animation: none;
+  }
+
+  [data-reveal-armed] [data-reveal]:not([data-revealed]),
+  [data-reveal-armed] [data-reveal="rise"]:not([data-revealed]) > * {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}
+
+/* ─── Résumé document ───────────────────────────────────────────────────── */
+
+.resume-h2 {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0b5cad;
+  border-bottom: 1px solid #e6e9ef;
+  padding-bottom: 3px;
+}
+
+/* ─── Print (résumé) ────────────────────────────────────────────────────── */
+
+@media print {
+  @page {
+    size: Letter;
+    margin: 0.5in 0.55in;
+  }
+
+  /* Print is always light, whatever theme is on screen. */
+  :root,
+  [data-theme] {
+    color-scheme: light !important;
+    --bg: #ffffff;
+    --bg-raised: #ffffff;
+    --surface: #ffffff;
+    --fg: #0b1220;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #0b1220 !important;
+  }
+
+  body::after,
+  .schematic-bg {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
 }

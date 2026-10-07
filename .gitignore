@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+!.env.example
+
+# local only: lists the real company names it replaces in screenshots
+/scripts/capture-itlc-screens.mjs
